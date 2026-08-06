@@ -320,7 +320,20 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('today');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
   const [isLoaded, setIsLoaded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [alerted1hTasks] = useState(() => new Set<string>());
+
+  // Wait for client to mount before reading localStorage
+  const [showWelcome, setShowWelcome] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('ledger_hasSeenWelcome')) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem('ledger_hasSeenWelcome', 'true');
+  };
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -416,6 +429,16 @@ export default function Home() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ notified: true })
             });
+          } else if (taskDate > now && taskDate.getTime() - now.getTime() <= 60 * 60000 && !alerted1hTasks.has(task.id)) {
+            // Due in less than 1 hour, and we haven't alerted yet in this session
+            alerted1hTasks.add(task.id);
+            addNotification(`Only 1 hour left to complete: "${task.title}"!`, 'alert');
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              new Notification('Task Reminder', {
+                body: `Only 1 hour left to complete: "${task.title}"!`,
+                icon: '/favicon.ico',
+              });
+            }
           }
         }
       });
@@ -771,6 +794,31 @@ export default function Home() {
             </SpotlightCard>
 
           </motion.div>
+
+          <AnimatePresence>
+            {showWelcome && activeTab === 'today' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="welcome-card"
+                style={{
+                  padding: '1.5rem',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  marginBottom: '2rem',
+                  position: 'relative'
+                }}
+              >
+                <button onClick={dismissWelcome} style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'rgba(255,255,255,0.4)', background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>Welcome to Ledger</h3>
+                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', lineHeight: 1.5, maxWidth: '90%' }}>
+                  Ledger is your personal daily task tracker. Use the form above to add your first task. You'll receive desktop and in-app alerts when tasks are 1 hour away or due immediately. 
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Search Bar + Section Header */}
           <div style={{ marginBottom: '1.25rem' }}>
