@@ -8,6 +8,7 @@ import { UserButton, Show, SignInButton } from "@clerk/nextjs";
 
 import Magnetic from '@/components/Magnetic';
 import SpotlightCard from '@/components/SpotlightCard';
+import OnboardingSlideshow from '@/components/OnboardingSlideshow';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface Task {
@@ -321,6 +322,7 @@ export default function Home() {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
   const [isLoaded, setIsLoaded] = useState(false);
   const [alerted1hTasks] = useState(() => new Set<string>());
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Wait for client to mount before reading localStorage
   const [showWelcome, setShowWelcome] = useState(false);
@@ -795,30 +797,7 @@ export default function Home() {
 
           </motion.div>
 
-          <AnimatePresence>
-            {showWelcome && activeTab === 'today' && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="welcome-card"
-                style={{
-                  padding: '1.5rem',
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  marginBottom: '2rem',
-                  position: 'relative'
-                }}
-              >
-                <button onClick={dismissWelcome} style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'rgba(255,255,255,0.4)', background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={18} /></button>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--color-primary)' }}>Welcome to Ledger</h3>
-                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', lineHeight: 1.5, maxWidth: '90%' }}>
-                  Ledger is your personal daily task tracker. Use the form above to add your first task. You'll receive desktop and in-app alerts when tasks are 1 hour away or due immediately. 
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {showWelcome && <OnboardingSlideshow onComplete={dismissWelcome} />}
 
           {/* Search Bar + Section Header */}
           <div style={{ marginBottom: '1.25rem' }}>
