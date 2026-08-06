@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/session';
+import { auth } from '@clerk/nextjs/server';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session.userId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -17,7 +17,7 @@ export async function PATCH(
     
     // Ownership check
     const existingTask = await prisma.task.findUnique({ where: { id } });
-    if (!existingTask || existingTask.userId !== session.userId) {
+    if (!existingTask || existingTask.userId !== userId) {
       return NextResponse.json({ error: 'Task not found or unauthorized' }, { status: 404 });
     }
 
@@ -44,8 +44,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
-    if (!session.userId) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -53,7 +53,7 @@ export async function DELETE(
 
     // Ownership check
     const existingTask = await prisma.task.findUnique({ where: { id } });
-    if (!existingTask || existingTask.userId !== session.userId) {
+    if (!existingTask || existingTask.userId !== userId) {
       return NextResponse.json({ error: 'Task not found or unauthorized' }, { status: 404 });
     }
 

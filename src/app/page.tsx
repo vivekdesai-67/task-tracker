@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { format, isToday, isPast, parseISO, differenceInCalendarDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, subMonths, addMonths, isSameMonth, isSameDay } from 'date-fns';
 import { Plus, Trash2, Calendar, ChevronLeft, ChevronRight, Clock, Tag as TagIcon, LayoutDashboard, CalendarDays, AlertCircle, Archive, RefreshCcw, LogOut, Search, X, Pencil, Info, Bell, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logout } from '@/app/actions/auth';
+import { UserButton, Show, SignInButton } from "@clerk/nextjs";
 
 import Magnetic from '@/components/Magnetic';
 import SpotlightCard from '@/components/SpotlightCard';
@@ -639,13 +639,15 @@ export default function Home() {
                 <Info size={16} />
               </motion.button>
             </Magnetic>
-            <form action={logout}>
-              <Magnetic strength={0.2}>
-                <motion.button type="submit" whileTap={{ scale: 0.95 }} className="action-btn delete" title="Sign Out">
-                  <LogOut size={16} />
-                </motion.button>
-              </Magnetic>
-            </form>
+            <div className="action-divider" style={{ margin: '0 8px' }} />
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="action-btn" style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', background: 'var(--color-accent-teal)', color: '#000', fontWeight: 600 }}>Log In</button>
+              </SignInButton>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
           </div>
         </div>
       </nav>
