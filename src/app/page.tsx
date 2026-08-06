@@ -100,16 +100,22 @@ function NotificationCenterModal({
   return (
     <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1000, justifyContent: 'flex-end', alignItems: 'flex-start' }}>
       <motion.div
-        className="modal-content"
+        className="modal-content drawer"
         onClick={e => e.stopPropagation()}
-        initial={{ opacity: 0, x: 20 }}
+        initial={{ opacity: 0, x: '100%' }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 20 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        style={{ width: '350px', maxHeight: '80vh', overflowY: 'auto', margin: '1rem', borderRadius: '12px' }}
+        exit={{ opacity: 0, x: '100%' }}
+        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+        style={{ 
+          width: '380px', height: '100vh', margin: 0, 
+          borderRadius: 0, borderLeft: '1px solid rgba(255,255,255,0.05)',
+          background: 'linear-gradient(180deg, #07090e 0%, #111726 100%)',
+          boxShadow: '-20px 0 40px rgba(0,0,0,0.5)',
+          display: 'flex', flexDirection: 'column'
+        }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: 'var(--color-text-inverse)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--color-text-inverse)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Bell size={16} /> Notification Center
           </h2>
           <button onClick={onClose} style={{ color: 'rgba(255,255,255,0.4)' }}><X size={18} /></button>
