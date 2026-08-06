@@ -405,18 +405,18 @@ export default function Home() {
   // Check reminders whenever tasks change or every minute
   useEffect(() => {
     const checkReminders = () => {
-      if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
-
       const now = new Date();
       tasks.forEach(async (task) => {
         if (!task.done && !task.deleted_at && !task.notified && task.due_time) {
           const taskDate = new Date(`${task.due_date.split('T')[0]}T${task.due_time}`);
           if (taskDate <= now && taskDate.getTime() > now.getTime() - 5 * 60000) {
             // Task is due and was due within the last 5 minutes
-            new Notification('Task Reminder', {
-              body: `"${task.title}" is due now!`,
-              icon: '/favicon.ico',
-            });
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              new Notification('Task Reminder', {
+                body: `"${task.title}" is due now!`,
+                icon: '/favicon.ico',
+              });
+            }
             addNotification(`"${task.title}" is due now!`, 'alert');
             // Mark as notified locally
             setTasks(prev => prev.map(t => t.id === task.id ? { ...t, notified: true } : t));
@@ -444,7 +444,7 @@ export default function Home() {
     checkReminders();
     const interval = setInterval(checkReminders, 60000);
     return () => clearInterval(interval);
-  }, [tasks]);
+  }, [tasks, alerted1hTasks]);
 
   const fetchTasks = async () => {
     try {
@@ -975,11 +975,23 @@ export default function Home() {
                             </span>
                           )}
 
-                          {task.due_time && (
-                            <span className="meta-item" style={{ color: 'var(--color-accent-amber)' }}>
-                              <Clock size={12} /> {task.due_time}
-                            </span>
-                          )}
+                          {task.due_time && (() => {
+                            const taskDate = new Date(`${task.due_date.split('T')[0]}T${task.due_time}`);
+                            const now = new Date();
+                            const diffMins = Math.floor((taskDate.getTime() - now.getTime()) / 60000);
+                            const isDueSoon = diffMins > 0 && diffMins <= 60;
+                            const isLateToday = diffMins <= 0 && isToday(parsedDate);
+                            
+                            return (
+                              <span className="meta-item" style={{ 
+                                color: isLateToday ? 'var(--color-danger)' : isDueSoon ? 'var(--color-primary)' : 'var(--color-accent-amber)',
+                                fontWeight: isDueSoon || isLateToday ? 600 : 400
+                              }}>
+                                <Clock size={12} /> 
+                                {isLateToday ? 'Due now' : isDueSoon ? `${diffMins}m left` : task.due_time}
+                              </span>
+                            );
+                          })()}
 
                           {/* Priority dot / alert instead of verbose text */}
                           {task.priority === 'low' && (
