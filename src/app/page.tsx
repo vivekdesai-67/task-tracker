@@ -534,7 +534,15 @@ export default function Home() {
   const activeTasks = tasks.filter(t => !t.deleted_at);
   const deletedTasks = tasks.filter(t => !!t.deleted_at);
   const todayTasks = activeTasks.filter(t => isToday(parseISO(t.due_date)));
-  const overdueTasks = activeTasks.filter(t => isPast(parseISO(t.due_date)) && !isToday(parseISO(t.due_date)) && !t.done);
+  const overdueTasks = activeTasks.filter(t => {
+    if (t.done) return false;
+    if (t.due_time) {
+      const taskDate = new Date(`${t.due_date.split('T')[0]}T${t.due_time}`);
+      return taskDate < new Date();
+    }
+    const parsedDate = parseISO(t.due_date);
+    return isPast(parsedDate) && !isToday(parsedDate);
+  });
   const completedToday = todayTasks.filter(t => t.done).length;
   const progressPercent = todayTasks.length === 0 ? 0 : (completedToday / todayTasks.length) * 100;
 
