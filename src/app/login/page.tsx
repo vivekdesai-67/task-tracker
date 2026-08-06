@@ -1,11 +1,17 @@
 'use client';
 
-import { useActionState } from 'react';
-import { login } from '@/app/actions/auth';
+import { useActionState, useState } from 'react';
+import { login, register } from '@/app/actions/auth';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(login, undefined);
+  const [isLogin, setIsLogin] = useState(true);
+  const [loginState, loginAction, isLoginPending] = useActionState(login, undefined);
+  const [registerState, registerAction, isRegisterPending] = useActionState(register, undefined);
+
+  const state = isLogin ? loginState : registerState;
+  const isPending = isLogin ? isLoginPending : isRegisterPending;
+  const action = isLogin ? loginAction : registerAction;
 
   return (
     <div style={{
@@ -48,74 +54,119 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          style={{ textAlign: 'center', marginBottom: '2.5rem' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            marginBottom: '3rem',
+          }}
         >
           <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
-            fontFamily: "'Fraunces', serif",
-            fontSize: '2rem', fontWeight: 600,
-            color: '#f1f5f9', letterSpacing: '-0.03em',
-          }}>
-            <div style={{
-              width: 10, height: 10, borderRadius: '50%',
-              background: '#f59e0b',
-              boxShadow: '0 0 14px rgba(245,158,11,0.7)',
-            }} />
-            Ledger
-          </div>
-          <p style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '0.65rem',
-            color: 'rgba(255,255,255,0.2)',
-            letterSpacing: '0.12em',
+            width: '12px', height: '12px',
+            background: '#f59e0b',
+            borderRadius: '50%',
+            boxShadow: '0 0 15px rgba(245,158,11,0.5)',
+          }} />
+          <h1 style={{
+            fontSize: '1.25rem',
+            fontWeight: 500,
+            color: 'white',
+            letterSpacing: '0.15em',
+            margin: 0,
             textTransform: 'uppercase',
-            marginTop: '0.5rem',
           }}>
-            Personal Task Tracker
-          </p>
+            Ledger
+          </h1>
         </motion.div>
 
         {/* Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '16px',
-            padding: '2rem',
+            background: 'rgba(255,255,255,0.02)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '16px',
+            padding: '2.5rem 2rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
           }}
         >
-          <h1 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: '1.4rem', fontWeight: 500,
-            color: '#f1f5f9', marginBottom: '0.4rem',
-            letterSpacing: '-0.02em',
-          }}>
-            Welcome back
-          </h1>
-          <p style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '0.72rem',
-            color: 'rgba(255,255,255,0.3)',
-            marginBottom: '1.75rem',
-          }}>
-            Enter your password to open your ledger.
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+            <button
+              onClick={() => setIsLogin(true)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: isLogin ? 'white' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.9rem', fontWeight: isLogin ? 500 : 400,
+                borderBottom: isLogin ? '2px solid #f59e0b' : '2px solid transparent',
+                paddingBottom: '0.5rem', transition: 'all 0.2s',
+              }}
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => setIsLogin(false)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: !isLogin ? 'white' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.9rem', fontWeight: !isLogin ? 500 : 400,
+                borderBottom: !isLogin ? '2px solid #f59e0b' : '2px solid transparent',
+                paddingBottom: '0.5rem', transition: 'all 0.2s',
+              }}
+            >
+              Sign Up
+            </button>
+          </div>
 
-          <form action={formAction}>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{
-                display: 'block',
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: '0.65rem',
-                color: 'rgba(255,255,255,0.35)',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                marginBottom: '0.5rem',
+          <form action={action} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <label htmlFor="username" style={{
+                display: 'block', fontSize: '0.75rem', fontWeight: 500,
+                color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em',
+                textTransform: 'uppercase', marginBottom: '0.5rem',
+              }}>
+                Username
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autoFocus
+                autoComplete="username"
+                placeholder="johndoe"
+                style={{
+                  width: '100%',
+                  background: 'rgba(0,0,0,0.25)',
+                  border: `1px solid ${state?.error && state.error.includes('Username') ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '1rem',
+                  padding: '0.75rem 1rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'rgba(245,158,11,0.5)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(245,158,11,0.08)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = (state?.error && state.error.includes('Username')) ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" style={{
+                display: 'block', fontSize: '0.75rem', fontWeight: 500,
+                color: 'rgba(255,255,255,0.6)', letterSpacing: '0.05em',
+                textTransform: 'uppercase', marginBottom: '0.5rem',
               }}>
                 Password
               </label>
@@ -123,13 +174,12 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                autoFocus
-                autoComplete="current-password"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
                 placeholder="••••••••"
                 style={{
                   width: '100%',
                   background: 'rgba(0,0,0,0.25)',
-                  border: `1px solid ${state?.error ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  border: `1px solid ${state?.error && !state.error.includes('Username') ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)'}`,
                   borderRadius: '8px',
                   color: 'white',
                   fontFamily: "'IBM Plex Mono', monospace",
@@ -145,7 +195,7 @@ export default function LoginPage() {
                   e.target.style.boxShadow = '0 0 0 3px rgba(245,158,11,0.08)';
                 }}
                 onBlur={e => {
-                  e.target.style.borderColor = state?.error ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)';
+                  e.target.style.borderColor = (state?.error && !state.error.includes('Username')) ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.1)';
                   e.target.style.boxShadow = 'none';
                 }}
               />
@@ -178,32 +228,17 @@ export default function LoginPage() {
                 border: 'none',
                 borderRadius: '8px',
                 padding: '0.75rem',
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                cursor: isPending ? 'not-allowed' : 'pointer',
-                transition: 'background 0.2s, box-shadow 0.2s',
-                boxShadow: isPending ? 'none' : '0 4px 16px rgba(245,158,11,0.3)',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: isPending ? 'wait' : 'pointer',
+                marginTop: '0.5rem',
+                transition: 'background 0.2s',
               }}
             >
-              {isPending ? 'Unlocking…' : 'Unlock Ledger →'}
+              {isPending ? 'Authenticating...' : (isLogin ? 'Enter Ledger' : 'Create Account')}
             </motion.button>
           </form>
         </motion.div>
-
-        {/* Footer hint */}
-        <p style={{
-          textAlign: 'center',
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '0.62rem',
-          color: 'rgba(255,255,255,0.12)',
-          marginTop: '1.5rem',
-          letterSpacing: '0.06em',
-        }}>
-          Password set in .env → APP_PASSWORD
-        </p>
       </motion.div>
     </div>
   );

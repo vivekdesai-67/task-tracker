@@ -2,21 +2,84 @@
 
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function login(prevState: { error?: string } | undefined, formData: FormData) {
+  const username = formData.get('username') as string;
   const password = formData.get('password') as string;
 
-  if (!password) {
-    return { error: 'Password is required.' };
+  if (!username || !password) {
+    return { error: 'Username and password are required.' };
   }
 
-  if (password !== process.env.APP_PASSWORD) {
-    return { error: 'Incorrect password. Try again.' };
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) {
+      return { error: 'Invalid username or password.' };
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isValidPassword) {
+      return { error: 'Invalid username or password.' };
+    }
+
+    const session = await getSession();
+    session.userId = user.id;
+    session.username = user.username;
+    await session.save();
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return { error: 'An error occurred during login.' };
   }
 
-  const session = await getSession();
-  session.isLoggedIn = true;
-  await session.save();
+  redirect('/');
+}
+
+export async function register(prevState: { error?: string } | undefined, formData: FormData) {
+  const username = formData.get('username') as string;
+  const password = formData.get('password') as string;
+
+  if (!username || !password) {
+    return { error: 'Username and password are required.' };
+  }
+
+  if (password.length < 6) {
+    return { error: 'Password must be at least 6 characters.' };
+  }
+
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUser) {
+      return { error: 'Username already exists.' };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        password_hash: hashedPassword,
+      },
+    });
+
+    const session = await getSession();
+    session.userId = user.id;
+    session.username = user.username;
+    await session.save();
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    return { error: 'An error occurred during registration.' };
+  }
 
   redirect('/');
 }

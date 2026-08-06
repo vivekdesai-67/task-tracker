@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
       password: sessionOptions.password as string,
     });
 
-    if (!session.isLoggedIn) {
+    if (!session.userId) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   } catch {

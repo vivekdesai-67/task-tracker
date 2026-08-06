@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/session';
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
-    const status = searchParams.get('status'); // 'today', 'upcoming', 'overdue'
-    
-    // Simplest approach: fetch all and filter in frontend for MVP, 
-    // or we can sort by due_date
+    const session = await getSession();
+    if (!session.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const tasks = await prisma.task.findMany({
+      where: { userId: session.userId },
       orderBy: [
         { done: 'asc' },
         { due_date: 'asc' }
@@ -25,6 +26,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    if (!session.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { title, due_date, due_time, priority, tag, notes } = body;
 
@@ -36,10 +42,11 @@ export async function POST(request: Request) {
         priority: priority || 'med',
         tag: tag || null,
         notes: notes || '',
+        userId: session.userId,
       },
     });
 
-    return NextResponse.json(task, { status: 201 });
+    return NextResponse.json(task);
   } catch (error) {
     console.error('POST /api/tasks error:', error);
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
