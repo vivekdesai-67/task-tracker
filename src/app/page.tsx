@@ -610,6 +610,11 @@ export default function Home() {
           >
             <Search size={18} />
           </button>
+          <Show when="signed-in">
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: '0.25rem' }}>
+              <UserButton />
+            </div>
+          </Show>
         </div>
       </div>
 
