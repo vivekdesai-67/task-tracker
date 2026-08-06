@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Check } from 'lucide-react';
+import { ChevronRight, Check, Sparkles, PencilLine, BellRing, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 
@@ -11,25 +11,25 @@ const slides = [
     id: 1,
     title: "Welcome to Ledger",
     content: "Your personal, single-user daily task tracker with a clean, distraction-free aesthetic.",
-    icon: "✦"
+    icon: <Sparkles size={48} strokeWidth={1.5} color="var(--color-primary)" />
   },
   {
     id: 2,
     title: "Adding & Prioritizing",
     content: "Quickly add tasks, assign priorities (Low, Med, Important), and add custom tags like #work.",
-    icon: "📝"
+    icon: <PencilLine size={48} strokeWidth={1.5} color="var(--color-primary)" />
   },
   {
     id: 3,
     title: "Smart Alerts",
     content: "Ledger will automatically notify you exactly 1 hour before a task is due, and again when it's immediately due.",
-    icon: "🔔"
+    icon: <BellRing size={48} strokeWidth={1.5} color="var(--color-primary)" />
   },
   {
     id: 4,
     title: "Recycle Bin",
     content: "Accidentally deleted a task? No problem. Open the Recycle Bin from the navigation menu to restore it anytime.",
-    icon: "🗑️"
+    icon: <Trash2 size={48} strokeWidth={1.5} color="var(--color-primary)" />
   }
 ];
 
@@ -85,11 +85,19 @@ export default function WelcomePage() {
                 backdropFilter: 'blur(10px)'
               }}
             >
-              <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>{slides[currentSlide].icon}</div>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', color: 'var(--color-text-inverse)', marginBottom: '1rem' }}>
+              <div style={{ 
+                marginBottom: '2rem', 
+                padding: '1.5rem', 
+                background: 'rgba(255,255,255,0.03)', 
+                borderRadius: '50%', 
+                boxShadow: '0 0 30px rgba(230, 164, 82, 0.1)' 
+              }}>
+                {slides[currentSlide].icon}
+              </div>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', color: 'var(--color-text-inverse)', marginBottom: '1.25rem', fontWeight: 500 }}>
                 {slides[currentSlide].title}
               </h2>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', lineHeight: 1.6 }}>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.15rem', lineHeight: 1.7, maxWidth: '90%' }}>
                 {slides[currentSlide].content}
               </p>
             </motion.div>
