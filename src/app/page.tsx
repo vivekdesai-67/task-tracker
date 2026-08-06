@@ -434,11 +434,13 @@ export default function Home() {
             });
           } else if (taskDate > now && taskDate.getTime() - now.getTime() <= 60 * 60000 && !alerted1hTasks.has(task.id)) {
             // Due in less than 1 hour, and we haven't alerted yet in this session
+            const diffMins = Math.round((taskDate.getTime() - now.getTime()) / 60000);
+            const timeStr = diffMins === 60 ? "1 hour" : `${diffMins} minutes`;
             alerted1hTasks.add(task.id);
-            addNotification(`Only 1 hour left to complete: "${task.title}"!`, 'alert');
+            addNotification(`Only ${timeStr} left to complete: "${task.title}"!`, 'alert');
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
               new Notification('Task Reminder', {
-                body: `Only 1 hour left to complete: "${task.title}"!`,
+                body: `Only ${timeStr} left to complete: "${task.title}"!`,
                 icon: '/favicon.ico',
               });
             }
