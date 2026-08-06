@@ -2,15 +2,13 @@
 > daily-task-tracker@0.1.0 start
 > next start
 
-▲ Next.js 16.3.0
-- Local:         http://localhost:3001
-- Network:       http://192.168.1.161:3001
-✓ Ready in 51ms
-⚠ Warning: Next.js ignored package-lock.json in /Users/vivekdesai/Downloads because it is outside the current Git repository (/Users/vivekdesai/Downloads/Dailytasktracker).
- To use this directory, set `outputFileTracingRoot` in your Next.js config.
-
-✓ Running next.config.ts took 13ms
-Attention: Clerk collects telemetry data from its SDKs when connected to development instances.
-The data collected is used to inform Clerk's product roadmap.
-To learn more, including how to opt-out from the telemetry program, visit: https://clerk.com/docs/telemetry.
-
+⨯ Failed to start server
+Error: listen EADDRINUSE: address already in use :::3001
+    at <unknown> (Error: listen EADDRINUSE: address already in use :::3001)
+    at new Promise (<anonymous>) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
