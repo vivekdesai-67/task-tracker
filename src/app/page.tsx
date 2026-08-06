@@ -996,7 +996,7 @@ export default function Home() {
                                 fontWeight: isDueSoon || isLateToday ? 600 : 400
                               }}>
                                 <Clock size={12} /> 
-                                {isLateToday ? 'Due now' : isDueSoon ? `${diffMins}m left` : task.due_time}
+                                {isLateToday ? 'Due now' : isDueSoon ? `${diffMins}m left` : format(taskDate, 'h:mm a')}
                               </span>
                             );
                           })()}
