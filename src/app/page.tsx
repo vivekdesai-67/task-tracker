@@ -8,8 +8,8 @@ import { UserButton, Show, SignInButton } from "@clerk/nextjs";
 
 import Magnetic from '@/components/Magnetic';
 import SpotlightCard from '@/components/SpotlightCard';
-import OnboardingSlideshow from '@/components/OnboardingSlideshow';
 import toast, { Toaster } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 interface Task {
   id: string;
@@ -323,19 +323,14 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [alerted1hTasks] = useState(() => new Set<string>());
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
-  // Wait for client to mount before reading localStorage
-  const [showWelcome, setShowWelcome] = useState(false);
+  // Redirect to welcome page for new users
   useEffect(() => {
     if (typeof window !== 'undefined' && !localStorage.getItem('ledger_hasSeenWelcome')) {
-      setShowWelcome(true);
+      router.push('/welcome');
     }
-  }, []);
-
-  const dismissWelcome = () => {
-    setShowWelcome(false);
-    localStorage.setItem('ledger_hasSeenWelcome', 'true');
-  };
+  }, [router]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -796,8 +791,6 @@ export default function Home() {
             </SpotlightCard>
 
           </motion.div>
-
-          {showWelcome && <OnboardingSlideshow onComplete={dismissWelcome} />}
 
           {/* Search Bar + Section Header */}
           <div style={{ marginBottom: '1.25rem' }}>
