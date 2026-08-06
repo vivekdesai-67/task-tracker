@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { format, isToday, isPast, parseISO, differenceInCalendarDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, subMonths, addMonths, isSameMonth, isSameDay } from 'date-fns';
 import { Plus, Trash2, Calendar, ChevronLeft, ChevronRight, Clock, Tag as TagIcon, LayoutDashboard, CalendarDays, AlertCircle, Archive, RefreshCcw, LogOut, Search, X, Pencil, Info, Bell, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserButton, Show, SignInButton } from "@clerk/nextjs";
+import { UserButton, Show, SignInButton, useClerk } from "@clerk/nextjs";
 
 import Magnetic from '@/components/Magnetic';
 import SpotlightCard from '@/components/SpotlightCard';
@@ -323,6 +323,7 @@ function EditTaskModal({ task, onClose, onSave }: { task: Task, onClose: () => v
 }
 
 export default function Home() {
+  const { signOut } = useClerk();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState('today');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
@@ -610,11 +611,14 @@ export default function Home() {
           >
             <Search size={18} />
           </button>
-          <Show when="signed-in">
-            <div style={{ display: 'flex', alignItems: 'center', marginLeft: '0.25rem' }}>
-              <UserButton />
-            </div>
-          </Show>
+          <button
+            className="mobile-search-btn"
+            onClick={() => signOut({ redirectUrl: '/sign-in' })}
+            title="Log Out"
+            style={{ color: '#f43f5e' }}
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
 
