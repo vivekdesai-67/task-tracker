@@ -801,7 +801,17 @@ export default function Home() {
                     <motion.button
                       type="button"
                       whileTap={{ scale: 0.93 }}
-                      onClick={() => setIsMeeting(m => !m)}
+                      onClick={() => {
+                        const next = !isMeeting;
+                        setIsMeeting(next);
+                        if (next) {
+                          // Auto-fill title if it's empty or was already "Meeting"
+                          if (!title.trim() || title === 'Meeting') setTitle('Meeting');
+                        } else {
+                          // Clear auto-filled title when de-selecting meeting
+                          if (title === 'Meeting') setTitle('');
+                        }
+                      }}
                       title="Toggle meeting"
                       style={{
                         display: 'flex', alignItems: 'center', gap: '0.3rem',
