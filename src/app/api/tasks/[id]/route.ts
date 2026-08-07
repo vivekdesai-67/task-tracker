@@ -21,10 +21,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Task not found or unauthorized' }, { status: 404 });
     }
 
-    // Convert date string to Date object if due_date is provided
+    // Convert date strings to Date objects if provided
     let updateData = { ...body };
     if (body.due_date) {
       updateData.due_date = new Date(body.due_date);
+    }
+    if (body.start_date) {
+      updateData.start_date = new Date(body.start_date);
+    } else if (body.start_date === null) {
+      updateData.start_date = null;
     }
 
     const task = await prisma.task.update({

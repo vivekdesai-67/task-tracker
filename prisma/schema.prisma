@@ -11,6 +11,7 @@ model Task {
   id         String   @id @default(uuid())
   title      String
   notes      String?  @default("")
+  start_date DateTime?
   due_date   DateTime
   due_time   String?
   priority   String   @default("med") // 'low', 'med', 'high'

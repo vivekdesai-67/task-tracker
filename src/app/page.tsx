@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 interface Task {
   id: string;
   title: string;
+  start_date: string | null;
   due_date: string;
   due_time: string | null;
   priority: string;
@@ -228,6 +229,7 @@ function CalendarView({
 
 function EditTaskModal({ task, onClose, onSave }: { task: Task, onClose: () => void, onSave: (t: Task) => void }) {
   const [title, setTitle] = useState(task.title);
+  const [startDate, setStartDate] = useState(task.start_date ? format(parseISO(task.start_date), 'yyyy-MM-dd') : '');
   const [dueDate, setDueDate] = useState(task.due_date ? format(parseISO(task.due_date), 'yyyy-MM-dd') : '');
   const [dueTime, setDueTime] = useState(task.due_time || '');
   const [priority, setPriority] = useState(task.priority || 'med');
@@ -239,6 +241,7 @@ function EditTaskModal({ task, onClose, onSave }: { task: Task, onClose: () => v
     onSave({
       ...task,
       title: title.trim(),
+      start_date: startDate ? new Date(startDate).toISOString() : null,
       due_date: new Date(dueDate).toISOString(),
       due_time: dueTime || null,
       priority,
@@ -286,10 +289,17 @@ function EditTaskModal({ task, onClose, onSave }: { task: Task, onClose: () => v
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <div style={{ flex: 1 }}>
-              <label htmlFor="edit-task-date" className="sr-only">Due Date</label>
-              <input id="edit-task-date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required 
+              <label htmlFor="edit-task-start" style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.25rem' }}>Start Date (optional)</label>
+              <input id="edit-task-start" type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
                 style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }} />
             </div>
+            <div style={{ flex: 1 }}>
+              <label htmlFor="edit-task-date" style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '0.25rem' }}>Due Date</label>
+              <input id="edit-task-date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required
+                style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white' }} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
             <div style={{ flex: 1 }}>
               <label htmlFor="edit-task-time" className="sr-only">Due Time</label>
               <input id="edit-task-time" type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} 
@@ -355,6 +365,7 @@ export default function Home() {
 
   // Form State
   const [title, setTitle] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [dueTime, setDueTime] = useState('');
   const [priority, setPriority] = useState('med');
@@ -471,6 +482,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
+          start_date: startDate ? new Date(startDate).toISOString() : null,
           due_date: new Date(dueDate).toISOString(),
           due_time: dueTime || null,
           priority,
@@ -482,6 +494,7 @@ export default function Home() {
         setTasks(prev => [...prev, newTask]);
         addNotification('Task created!', 'success');
         setTitle('');
+        setStartDate('');
         setDueDate(format(new Date(), 'yyyy-MM-dd'));
         setDueTime('');
         setPriority('med');
@@ -507,6 +520,7 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: updatedTask.title,
+        start_date: updatedTask.start_date ? new Date(updatedTask.start_date).toISOString() : null,
         due_date: new Date(updatedTask.due_date).toISOString(),
         due_time: updatedTask.due_time || null,
         priority: updatedTask.priority,
@@ -762,6 +776,16 @@ export default function Home() {
                     autoComplete="off"
                   />
                   <div className="quick-add-meta">
+                    <label htmlFor="task-start-date" className="sr-only">Start date (optional)</label>
+                    <input
+                      id="task-start-date"
+                      name="start_date"
+                      type="date"
+                      value={startDate}
+                      onChange={e => setStartDate(e.target.value)}
+                      title="Start date (optional)"
+                      placeholder="Start"
+                    />
                     <label htmlFor="task-due-date" className="sr-only">Due date</label>
                     <input
                       id="task-due-date"
@@ -990,7 +1014,10 @@ export default function Home() {
                         <div className="task-meta">
                           <span className="meta-item">
                             <Calendar size={12} />
-                            {isToday(parsedDate) ? 'Today' : format(parsedDate, 'MMM d')}
+                            {task.start_date
+                              ? `${format(parseISO(task.start_date), 'MMM d')} → ${isToday(parsedDate) ? 'Today' : format(parsedDate, 'MMM d')}`
+                              : isToday(parsedDate) ? 'Today' : format(parsedDate, 'MMM d')
+                            }
                           </span>
 
                           {/* Overdue — calm, muted label. NOT alarm-red. */}
