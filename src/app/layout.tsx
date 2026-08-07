@@ -3,10 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Ledger — Daily Task Tracker",
-  description: "A personal, single-user daily task tracker with a ledger aesthetic.",
+  description: "A personal daily task tracker with a ledger aesthetic.",
 };
-
-import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 
 export default function RootLayout({
   children,
@@ -16,9 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col">
-        <ClerkProvider>
-          {children}
-        </ClerkProvider>
+        {children}
       </body>
     </html>
   );

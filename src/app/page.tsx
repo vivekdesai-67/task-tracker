@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { format, isToday, isPast, parseISO, differenceInCalendarDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, subMonths, addMonths, isSameMonth, isSameDay } from 'date-fns';
 import { Plus, Trash2, Calendar, ChevronLeft, ChevronRight, Clock, Tag as TagIcon, LayoutDashboard, CalendarDays, AlertCircle, Archive, RefreshCcw, LogOut, Search, X, Pencil, Info, Bell, CheckCircle2, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserButton, Show, SignInButton, useClerk } from "@clerk/nextjs";
 
 import Magnetic from '@/components/Magnetic';
 import SpotlightCard from '@/components/SpotlightCard';
@@ -334,7 +333,10 @@ function EditTaskModal({ task, onClose, onSave }: { task: Task, onClose: () => v
 }
 
 export default function Home() {
-  const { signOut } = useClerk();
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/sign-in';
+  };
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTab, setActiveTab] = useState('today');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
@@ -644,7 +646,7 @@ export default function Home() {
           </button>
           <button
             className="mobile-search-btn"
-            onClick={() => signOut({ redirectUrl: '/sign-in' })}
+            onClick={handleLogout}
             title="Log Out"
             style={{ color: '#f43f5e' }}
           >
@@ -716,14 +718,15 @@ export default function Home() {
               </motion.button>
             </Magnetic>
             <div className="action-divider" style={{ margin: '0 8px' }} />
-            <Show when="signed-out">
-              <SignInButton mode="modal">
-                <button className="action-btn" style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', background: 'var(--color-accent-teal)', color: '#000', fontWeight: 600 }}>Log In</button>
-              </SignInButton>
-            </Show>
-            <Show when="signed-in">
-              <UserButton />
-            </Show>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              className="action-btn"
+              onClick={handleLogout}
+              title="Sign Out"
+              style={{ color: '#f43f5e' }}
+            >
+              <LogOut size={16} />
+            </motion.button>
           </div>
         </div>
       </nav>

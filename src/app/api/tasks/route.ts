@@ -1,35 +1,28 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/server';
+import { getIronSession } from 'iron-session';
+import { sessionOptions, SessionData } from '@/lib/session';
 
 export async function GET(request: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await getIronSession<SessionData>(request, NextResponse.next(), sessionOptions);
+    if (!session.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const tasks = await prisma.task.findMany({
-      where: { userId },
-      orderBy: [
-        { done: 'asc' },
-        { due_date: 'asc' }
-      ]
+      where: { userId: session.userId },
+      orderBy: [{ done: 'asc' }, { due_date: 'asc' }]
     });
-    
     return NextResponse.json(tasks);
   } catch (error: any) {
     console.error('GET /api/tasks error:', error);
-    return NextResponse.json({ error: 'Failed to fetch tasks', details: error?.message || String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch tasks', details: error?.message }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await getIronSession<SessionData>(request, NextResponse.next(), sessionOptions);
+    if (!session.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
     const { title, is_meeting, start_date, due_date, due_time, priority, tag, notes } = body;
@@ -44,13 +37,13 @@ export async function POST(request: Request) {
         priority: priority || 'med',
         tag: tag || null,
         notes: notes || '',
-        userId,
+        userId: session.userId,
       },
     });
 
     return NextResponse.json(task);
   } catch (error: any) {
     console.error('POST /api/tasks error:', error);
-    return NextResponse.json({ error: 'Failed to create task', details: error?.message || String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create task', details: error?.message }, { status: 500 });
   }
 }

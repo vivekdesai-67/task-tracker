@@ -1,22 +1,33 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getIronSession } from 'iron-session';
+import { sessionOptions, SessionData } from '@/lib/session';
 
-const isProtectedRoute = createRouteMatcher([
-  '/',
-  '/welcome',
-  '/api(.*)'
-]);
+const PUBLIC_PATHS = ['/sign-in', '/sign-up', '/welcome', '/_next', '/favicon'];
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+export default async function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Allow public paths
+  if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+    return NextResponse.next();
   }
-});
+
+  // Check session
+  const res = NextResponse.next();
+  const session = await getIronSession<SessionData>(req, res, sessionOptions);
+
+  if (!session.userId) {
+    return NextResponse.redirect(new URL('/sign-in', req.url));
+  }
+
+  // Admin-only routes
+  if (pathname.startsWith('/admin') && session.role !== 'admin') {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  return res;
+}
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for Clerk's auto-proxy path
-    '/__clerk/:path*',
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

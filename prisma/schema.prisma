@@ -7,15 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Task {
+model User {
   id         String   @id @default(uuid())
+  username   String   @unique
+  password   String
+  role       String   @default("user") // "user" | "admin"
+  created_at DateTime @default(now())
+  tasks      Task[]
+}
+
+model Task {
+  id         String    @id @default(uuid())
   title      String
-  notes      String?  @default("")
-  is_meeting Boolean  @default(false)
+  notes      String?   @default("")
+  is_meeting Boolean   @default(false)
   start_date DateTime?
   due_date   DateTime
   due_time   String?
-  priority   String   @default("med") // 'low', 'med', 'high'
+  priority   String    @default("med")
   tag        String?
   done       Boolean   @default(false)
   notified   Boolean   @default(false)
@@ -24,4 +33,5 @@ model Task {
   updated_at DateTime  @updatedAt
 
   userId     String
+  user       User      @relation(fields: [userId], references: [id])
 }
