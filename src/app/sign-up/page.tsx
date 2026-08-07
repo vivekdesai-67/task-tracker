@@ -44,7 +44,7 @@ export default function SignUpPage() {
       >
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-primary)' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-accent-teal, #14b8a6)' }} />
             <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', color: 'white' }}>Ledger</span>
           </div>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>Create your account</p>
@@ -90,7 +90,7 @@ export default function SignUpPage() {
             <motion.button
               type="submit" disabled={loading}
               whileTap={{ scale: 0.97 }}
-              style={{ marginTop: '0.5rem', padding: '0.85rem', background: 'var(--color-primary)', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontFamily: 'var(--font-sans)' }}
+              style={{ marginTop: '0.5rem', padding: '0.85rem', background: 'var(--color-accent-teal, #14b8a6)', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontFamily: 'var(--font-sans)' }}
             >
               <UserPlus size={16} /> {loading ? 'Creating account…' : 'Create Account'}
             </motion.button>
@@ -99,7 +99,7 @@ export default function SignUpPage() {
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
           Already have an account?{' '}
-          <a href="/sign-in" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}>Sign in</a>
+          <a href="/sign-in" style={{ color: 'var(--color-accent-teal, #14b8a6)', textDecoration: 'none', fontWeight: 600 }}>Sign in</a>
         </p>
       </motion.div>
     </div>
