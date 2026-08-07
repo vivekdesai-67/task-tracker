@@ -561,6 +561,12 @@ export default function Home() {
   const completedToday = todayTasks.filter(t => t.done).length;
   const progressPercent = todayTasks.length === 0 ? 0 : (completedToday / todayTasks.length) * 100;
 
+  // Global stats across ALL tasks (today + overdue + future)
+  const allPending = activeTasks.filter(t => !t.done).length;
+  const allCompleted = activeTasks.filter(t => t.done).length;
+  const allTotal = activeTasks.length;
+  const globalProgressPercent = allTotal === 0 ? 0 : (allCompleted / allTotal) * 100;
+
   const displayedTasks = (() => {
     let list: Task[];
     if (activeTab === 'today')    list = todayTasks;
@@ -729,25 +735,29 @@ export default function Home() {
             </div>
             <div className="progress-container">
               <div className="task-progress">
-                <div className="task-progress-numbers">
-                  <span className="task-pending-count">
-                    {todayTasks.length - completedToday}
-                  </span>
-                  <span className="task-pending-label">pending</span>
+                <div className="task-progress-numbers" style={{ display: 'flex', gap: '1.5rem', alignItems: 'baseline' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span className="task-pending-count">{allPending}</span>
+                    <span className="task-pending-label">pending</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.55 }}>
+                    <span className="task-pending-count" style={{ fontSize: '1.6rem' }}>{allCompleted}</span>
+                    <span className="task-pending-label">completed</span>
+                  </div>
                 </div>
                 <div className="task-progress-bar-wrap">
                   <motion.div
                     className="task-progress-bar-fill"
                     initial={{ scaleX: 0 }}
-                    animate={{ scaleX: todayTasks.length === 0 ? 0 : progressPercent / 100 }}
+                    animate={{ scaleX: globalProgressPercent / 100 }}
                     transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                     style={{ transformOrigin: 'left' }}
                   />
                 </div>
                 <div className="task-progress-meta">
-                  <span>{completedToday} done</span>
+                  <span>{allCompleted} done</span>
                   <span style={{ opacity: 0.3 }}>·</span>
-                  <span>{todayTasks.length} total</span>
+                  <span>{allTotal} total</span>
                 </div>
               </div>
             </div>
