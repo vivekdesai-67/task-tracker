@@ -32,11 +32,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, start_date, due_date, due_time, priority, tag, notes } = body;
+    const { title, is_meeting, start_date, due_date, due_time, priority, tag, notes } = body;
 
     const task = await prisma.task.create({
       data: {
         title,
+        is_meeting: is_meeting || false,
         start_date: start_date ? new Date(start_date) : null,
         due_date: new Date(due_date),
         due_time: due_time || null,

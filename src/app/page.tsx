@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { format, isToday, isPast, parseISO, differenceInCalendarDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, subMonths, addMonths, isSameMonth, isSameDay } from 'date-fns';
-import { Plus, Trash2, Calendar, ChevronLeft, ChevronRight, Clock, Tag as TagIcon, LayoutDashboard, CalendarDays, AlertCircle, Archive, RefreshCcw, LogOut, Search, X, Pencil, Info, Bell, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Calendar, ChevronLeft, ChevronRight, Clock, Tag as TagIcon, LayoutDashboard, CalendarDays, AlertCircle, Archive, RefreshCcw, LogOut, Search, X, Pencil, Info, Bell, CheckCircle2, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton, Show, SignInButton, useClerk } from "@clerk/nextjs";
 
@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 interface Task {
   id: string;
   title: string;
+  is_meeting: boolean;
   start_date: string | null;
   due_date: string;
   due_time: string | null;
@@ -365,6 +366,7 @@ export default function Home() {
 
   // Form State
   const [title, setTitle] = useState('');
+  const [isMeeting, setIsMeeting] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [dueTime, setDueTime] = useState('');
@@ -482,6 +484,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
+          is_meeting: isMeeting,
           start_date: startDate ? new Date(startDate).toISOString() : null,
           due_date: new Date(dueDate).toISOString(),
           due_time: dueTime || null,
@@ -492,8 +495,9 @@ export default function Home() {
       if (res.ok) {
         const newTask = await res.json();
         setTasks(prev => [...prev, newTask]);
-        addNotification('Task created!', 'success');
+        addNotification(`${isMeeting ? 'Meeting' : 'Task'} created!`, 'success');
         setTitle('');
+        setIsMeeting(false);
         setStartDate('');
         setDueDate(format(new Date(), 'yyyy-MM-dd'));
         setDueTime('');
@@ -520,6 +524,7 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: updatedTask.title,
+        is_meeting: updatedTask.is_meeting,
         start_date: updatedTask.start_date ? new Date(updatedTask.start_date).toISOString() : null,
         due_date: new Date(updatedTask.due_date).toISOString(),
         due_time: updatedTask.due_time || null,
@@ -575,6 +580,12 @@ export default function Home() {
     else if (activeTab === 'calendar') list = activeTasks.filter(t => isSameDay(parseISO(t.due_date), selectedCalendarDate));
     else if (activeTab === 'trash')    list = deletedTasks;
     else list = activeTasks;
+    // Sort: meetings always first, then by date
+    list = [...list].sort((a, b) => {
+      if (a.is_meeting && !b.is_meeting) return -1;
+      if (!a.is_meeting && b.is_meeting) return 1;
+      return 0;
+    });
 
     // Apply search filter across title and tag
     if (searchQuery.trim()) {
@@ -786,6 +797,29 @@ export default function Home() {
                     autoComplete="off"
                   />
                   <div className="quick-add-meta">
+                    {/* Meeting Toggle Button */}
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() => setIsMeeting(m => !m)}
+                      title="Toggle meeting"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.3rem',
+                        padding: '0.3rem 0.65rem',
+                        borderRadius: '6px',
+                        border: isMeeting ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.12)',
+                        background: isMeeting ? 'rgba(129,140,248,0.15)' : 'transparent',
+                        color: isMeeting ? '#818cf8' : 'rgba(255,255,255,0.45)',
+                        fontWeight: isMeeting ? 600 : 400,
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <Video size={13} />
+                      Meeting
+                    </motion.button>
                     <label htmlFor="task-start-date" className="sr-only">Start date (optional)</label>
                     <input
                       id="task-start-date"
@@ -1020,7 +1054,21 @@ export default function Home() {
                         style={{ cursor: task.deleted_at ? 'default' : 'pointer' }}
                         title="Click to view/edit details"
                       >
-                        <div className="task-title">{task.title}</div>
+                        <div className="task-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {task.is_meeting && (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+                              fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em',
+                              padding: '0.15rem 0.45rem', borderRadius: '4px',
+                              background: 'rgba(129,140,248,0.15)', color: '#818cf8',
+                              border: '1px solid rgba(129,140,248,0.3)', flexShrink: 0,
+                              textTransform: 'uppercase'
+                            }}>
+                              <Video size={9} /> Meeting
+                            </span>
+                          )}
+                          {task.title}
+                        </div>
                         <div className="task-meta">
                           <span className="meta-item">
                             <Calendar size={12} />
